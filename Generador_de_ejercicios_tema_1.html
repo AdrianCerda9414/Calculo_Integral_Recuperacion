@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cálculo Integral · Antiderivadas o primitivas básicas</title>
+<script>
+  window.MathJax = {
+    tex: { inlineMath: [['$','$'],['\\(','\\)']], displayMath: [['$$','$$']] },
+    svg: { fontCache: 'global' },
+    options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+  };
+</script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+  :root{--bg:#f4f6fb;--card:#fff;--ink:#111827;--muted:#6b7280;--brand:#4f46e5;--brand2:#7c3aed;
+        --ok:#059669;--okbg:#ecfdf5;--err:#dc2626;--errbg:#fef2f2;--line:#e5e7eb;--warn:#b45309;--warnbg:#fffbeb}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+       background:var(--bg);color:var(--ink);line-height:1.55;min-height:100vh}
+  header{background:linear-gradient(135deg,var(--brand) 0%,var(--brand2) 100%);color:#fff;padding:26px 20px 30px}
+  .wrap{max-width:900px;margin:0 auto}
+  header h1{margin:0 0 6px;font-size:1.35rem;letter-spacing:-.01em}
+  header p{margin:0;opacity:.92;font-size:.92rem}
+  main{max-width:900px;margin:-20px auto 60px;padding:0 20px}
+  .card{background:var(--card);border-radius:16px;box-shadow:0 10px 30px rgba(17,24,39,.08);
+        padding:24px;border:1px solid var(--line)}
+  .barra{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:flex-end;margin-bottom:18px}
+  input[type="text"]{font:inherit;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;
+       background:#fff;color:var(--ink);outline:none;transition:border-color .15s,box-shadow .15s}
+  input[type="text"]:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(79,70,229,.14)}
+  #enunciado{font-size:1.03rem;background:#fafafe;border:1px solid var(--line);
+       border-left:4px solid var(--brand);border-radius:12px;padding:16px 18px;margin-bottom:18px}
+  .fila{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+  #respuesta{flex:1 1 240px;min-width:180px}
+  button{font:inherit;font-weight:650;border:none;border-radius:10px;padding:10px 16px;cursor:pointer;
+         transition:transform .06s,filter .15s,background .15s}
+  button:active{transform:translateY(1px)}
+  .btn-primary{background:var(--brand);color:#fff}
+  .btn-primary:hover{filter:brightness(1.08)}
+  .btn-ghost{background:#eef2ff;color:var(--brand)}
+  .btn-ghost:hover{background:#e0e7ff}
+  .btn-soft{background:#f3f4f6;color:#374151}
+  .btn-soft:hover{background:#e5e7eb}
+  .feedback{margin-top:16px;padding:14px 16px;border-radius:12px;font-weight:600;display:none}
+  .feedback.ok{display:block;background:var(--okbg);color:var(--ok);border:1px solid #a7f3d0}
+  .feedback.err{display:block;background:var(--errbg);color:var(--err);border:1px solid #fecaca}
+  .feedback code{background:#fff;border:1px solid #d1fae5;border-radius:4px;padding:1px 6px;font-size:.9em}
+  .panel{margin-top:14px;padding:14px 16px;border-radius:12px;font-size:.95rem;display:none}
+  .panel.pista{background:var(--warnbg);border:1px solid #fde68a;color:#7c2d12}
+  .panel.explicacion{background:#f5f3ff;border:1px solid #ddd6fe;color:#3730a3}
+  .panel.visible{display:block}
+  .panel h3{margin:0 0 6px;font-size:.82rem;text-transform:uppercase;letter-spacing:.06em;opacity:.8}
+  .marcador{display:flex;gap:18px;margin-top:20px;padding-top:16px;border-top:1px dashed var(--line);
+       font-size:.85rem;color:var(--muted);font-weight:600}
+  .marcador b{color:var(--ink)}
+  footer{max-width:900px;margin:0 auto 40px;padding:0 20px;color:var(--muted);font-size:.8rem;text-align:center}
+  .kbd{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;border:1px solid var(--line);
+       border-radius:6px;padding:1px 6px;font-size:.78rem}
+  @media(max-width:560px){.card{padding:18px}#enunciado{font-size:.98rem}}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <h1>Generador infinito de ejercicios</h1>
+    <p><b>Materia:</b> Cálculo Integral &nbsp;·&nbsp; <b>Tema:</b> Antiderivadas o primitivas básicas</p>
+  </div>
+</header>
+<main>
+  <div class="card">
+    <div class="barra"><button id="btnNuevo" class="btn-ghost">Nuevo ejercicio</button></div>
+    <div id="enunciado"></div>
+    <div class="fila">
+      <input id="respuesta" type="text" autocomplete="off" spellcheck="false"
+             placeholder="Usa ^ para potencias y / para fracciones. Ej: x^3/3+C">
+      <button id="btnVerificar" class="btn-primary">Verificar</button>
+      <button id="btnPista" class="btn-soft">Pista</button>
+      <button id="btnExplicacion" class="btn-soft">Explicación</button>
+    </div>
+    <div id="feedback" class="feedback"></div>
+    <div id="pistaBox" class="panel pista"></div>
+    <div id="explicacionBox" class="panel explicacion"></div>
+    <div class="marcador">
+      <span>Aciertos: <b id="mArc">0</b></span>
+      <span>Intentos: <b id="mInt">0</b></span>
+      <span style="margin-left:auto">Enter = verificar · <span class="kbd">N</span> = nuevo</span>
+    </div>
+  </div>
+</main>
+<footer>Generador aleatorio educativo · Cálculo Integral · Antiderivadas o primitivas básicas</footer>
+
+<script>
+function escaparHTML(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+function normalizar(valor){
+  var t=(valor===null||valor===undefined)?'':String(valor);
+  t=t.toLowerCase().trim();
+  t=t.replace(/\$/g,'');
+  t=t.replace(/\\(left|right|big|Big|bigg|Bigg)/g,'');
+  t=t.replace(/\\[,;:!]/g,'');
+  t=t.replace(/\\(quad|qquad)/g,'');
+  t=t.replace(/\\dfrac/g,'\\frac');
+  t=t.replace(/\\(cdot|times|ast)/g,'*');
+  t=t.replace(/\\div/g,'/');
+  t=t.replace(/\\sin/g,'sin').replace(/\\cos/g,'cos').replace(/\\tan/g,'tan');
+  t=t.replace(/\\ln/g,'ln').replace(/\\log/g,'log').replace(/\\exp/g,'exp');
+  t=t.replace(/\\pi/g,'pi');
+  t=t.replace(/²/g,'^2').replace(/³/g,'^3').replace(/⁴/g,'^4');
+  t=t.replace(/\s+/g,'');
+  t=t.replace(/·/g,'*');
+  var previo;
+  do{previo=t;t=t.replace(/\\frac\{([^{}]*)\}\{([^{}]*)\}/g,'(($1)/($2))');}while(t!==previo);
+  t=t.replace(/[{}]/g,'');
+  t=t.replace(/\\/g,'');
+  do{previo=t;t=t.replace(/\^\(([^()]*)\)/g,'^$1');}while(t!==previo);
+  t=t.replace(/\*\*/g,'^');
+  return t;
+}
+function sinParentesis(s){return String(s).replace(/[()]/g,'');}
+
+function coincideAntiderivada(entrada,acepta){
+  var u=normalizar(entrada);
+  if(!u)return false;
+  var uSinC=u.replace(/\+c$/,'').replace(/-c$/,'');
+  var uSin=sinParentesis(uSinC);
+  for(var i=0;i<acepta.length;i++){
+    var a=normalizar(acepta[i]);
+    var aSinC=a.replace(/\+c$/,'').replace(/-c$/,'');
+    if(u===a)return true;
+    if(uSinC===aSinC)return true;
+    if(uSin===sinParentesis(aSinC))return true;
+  }
+  return false;
+}
+
+/* ==================== GENERADOR: Antiderivadas ==================== */
+function genAntiderivadas(){
+  var t=Math.floor(Math.random()*5);
+
+  /* V0 — Regla de la potencia */
+  if(t===0){
+    var n0=2+Math.floor(Math.random()*4);
+    var p0=n0+1;
+    return{
+      tipo:'simbolica',
+      problema:'Una integrante del colectivo Mujeres en Código registra que la tasa de nuevos usuarios '+
+        'registrados en su aplicación comunitaria sigue $f(x)=x^{'+n0+'}$. '+
+        'Encuentra la familia de primitivas $\\displaystyle\\int x^{'+n0+'}\\,dx$.',
+      solucion:'$\\displaystyle\\int x^{'+n0+'}\\,dx=\\frac{x^{'+p0+'}}{'+p0+'}+C$',
+      respuestaLaTeX:'\\frac{x^{'+p0+'}}{'+p0+'}+C',
+      acepta:['x^'+p0+'/'+p0+'+C','x^{'+p0+'}/'+p0+'+C',
+              '\\frac{x^{'+p0+'}}{'+p0+'}+C','\\frac{x^'+p0+'}{'+p0+'}+C',
+              '(x^'+p0+')/'+p0+'+C','x^'+p0+'/'+p0,'\\frac{x^{'+p0+'}}{'+p0+'}'],
+      pista:'Aplica la regla de la potencia: $\\displaystyle\\int x^{n}\\,dx=\\frac{x^{n+1}}{n+1}+C$. '+
+        'Aquí $n='+n0+'$, así que el exponente sube a $'+p0+'$ y divides entre $'+p0+'$.',
+      explicacion:'Paso 1. Identifica el exponente: $n='+n0+'$. '+
+        'Paso 2. Aplica la regla: $\\int x^{'+n0+'}\\,dx=\\frac{x^{'+n0+'+1}}{'+n0+'+1}+C$. '+
+        'Paso 3. Simplifica: $\\frac{x^{'+p0+'}}{'+p0+'}+C$. '+
+        'No olvides la constante de integración $C$.'
+    };
+  }
+
+  /* V1 — Constante por potencia */
+  if(t===1){
+    var n1=1+2*Math.floor(Math.random()*2);
+    var m1=1+Math.floor(Math.random()*2);
+    var k1=m1*(n1+1);
+    var p1=n1+1;
+    var coef1=(m1===1)?'':String(m1);
+    return{
+      tipo:'simbolica',
+      problema:'En una comunidad textil de Oaxaca, la tasa semanal de producción de piezas sigue '+
+        '$f(x)='+k1+'x^{'+n1+'}$. '+
+        'Encuentra la primitiva general $\\displaystyle\\int '+k1+'x^{'+n1+'}\\,dx$.',
+      solucion:'$\\displaystyle\\int '+k1+'x^{'+n1+'}\\,dx='+coef1+'x^{'+p1+'}+C$',
+      respuestaLaTeX:coef1+'x^{'+p1+'}+C',
+      acepta:[coef1+'x^'+p1+'+C',coef1+'x^{'+p1+'}+C',
+              coef1+'x^'+p1,coef1+'x^{'+p1+'}'],
+      pista:'Saca la constante: $\\int '+k1+'x^{'+n1+'}\\,dx='+k1+'\\int x^{'+n1+'}\\,dx$. '+
+        'Después aplica $\\int x^{n}\\,dx=\\frac{x^{n+1}}{n+1}+C$. '+
+        'Observa que $'+k1+'$ es múltiplo de $'+p1+'$.',
+      explicacion:'Paso 1. Saca la constante: $'+k1+'\\int x^{'+n1+'}\\,dx$. '+
+        'Paso 2. Aplica la regla de la potencia: $'+k1+'\\cdot\\frac{x^{'+p1+'}}{'+p1+'}+C$. '+
+        'Paso 3. Simplifica: $\\frac{'+k1+'}{'+p1+'}x^{'+p1+'}+C='+coef1+'x^{'+p1+'}+C$.'
+    };
+  }
+
+  /* V2 — Suma de términos */
+  if(t===2){
+    var m2=1+2*Math.floor(Math.random()*2);
+    var k2=1+Math.floor(Math.random()*2);
+    var a2=k2*(m2+1);
+    var b2=1+Math.floor(Math.random()*5);
+    var p2=m2+1;
+    var coefA=(k2===1)?'':String(k2);
+    var coefB=(b2===1)?'':String(b2);
+    var t1a=coefA+'x^'+p2;
+    var t1b=coefA+'x^{'+p2+'}';
+    var t2=coefB+'x';
+    return{
+      tipo:'simbolica',
+      problema:'Una bióloga del programa Ciencia sin Fronteras modela la tasa de crecimiento de una colonia '+
+        'de microorganismos como $f(x)='+a2+'x^{'+m2+'}+'+b2+'$. '+
+        'Encuentra la familia de antiderivadas $\\displaystyle\\int\\left('+a2+'x^{'+m2+'}+'+b2+'\\right)dx$.',
+      solucion:'$\\displaystyle\\int\\left('+a2+'x^{'+m2+'}+'+b2+'\\right)dx='+t1a+'+'+t2+'+C$',
+      respuestaLaTeX:t1b+'+'+t2+'+C',
+      acepta:[t1a+'+'+t2+'+C',t1a+'+'+t2,t1b+'+'+t2+'+C',t1b+'+'+t2],
+      pista:'Integra término a término: '+
+        '$\\int '+a2+'x^{'+m2+'}\\,dx='+a2+'\\cdot\\frac{x^{'+p2+'}}{'+p2+'}$ '+
+        'y $\\int '+b2+'\\,dx='+b2+'x$. '+
+        'Recuerda que $'+a2+'$ es múltiplo de $'+p2+'$.',
+      explicacion:'Paso 1. Separa: $'+a2+'\\int x^{'+m2+'}\\,dx+\\int '+b2+'\\,dx$. '+
+        'Paso 2. Aplica la regla de la potencia al primer término: '+
+        '$'+a2+'\\cdot\\frac{x^{'+p2+'}}{'+p2+'}='+coefA+'x^{'+p2+'}$. '+
+        'Paso 3. Integra la constante: $\\int '+b2+'\\,dx='+b2+'x$. '+
+        'Paso 4. Junta todo: $'+t1a+'+'+t2+'+C$.'
+    };
+  }
+
+  /* V3 — Trigonométricas */
+  if(t===3){
+    var k3=1+Math.floor(Math.random()*3);
+    var esSeno=Math.random()<0.5;
+    if(esSeno){
+      var coefS=(k3===1)?'-':('-'+k3);
+      return{
+        tipo:'simbolica',
+        problema:'Una astrónoma del observatorio intercultural mide la velocidad angular de un péndulo: '+
+          '$v(t)='+(k3===1?'':k3)+'\\sin(t)$ rad/s. '+
+          'Encuentra la posición $s(t)=\\displaystyle\\int v(t)\\,dt$.',
+        solucion:'$s(t)='+coefS+'\\cos(t)+C$',
+        respuestaLaTeX:coefS+'\\cos(t)+C',
+        acepta:[coefS+'cos(t)+C',coefS+'cos(t)',coefS+'cosx+C',coefS+'cosx',
+                coefS+'\\cos(t)+C',coefS+'\\cos(t)'],
+        pista:'Recuerda que $\\dfrac{d}{dx}\\cos(x)=-\\sin(x)$, por lo tanto '+
+          '$\\int\\sin(x)\\,dx=-\\cos(x)+C$. La constante $'+k3+'$ se saca de la integral.',
+        explicacion:'Paso 1. Saca la constante: $'+k3+'\\int\\sin(t)\\,dt$. '+
+          'Paso 2. Aplica la regla: $\\int\\sin(t)\\,dt=-\\cos(t)+C$. '+
+          'Paso 3. Multiplica: $s(t)='+coefS+'\\cos(t)+C$.'
+      };
+    }else{
+      var coefC=(k3===1)?'':String(k3);
+      return{
+        tipo:'simbolica',
+        problema:'Una astrónoma del observatorio intercultural mide la velocidad angular de un péndulo: '+
+          '$v(t)='+(k3===1?'':k3)+'\\cos(t)$ rad/s. '+
+          'Encuentra la posición $s(t)=\\displaystyle\\int v(t)\\,dt$.',
+        solucion:'$s(t)='+coefC+'\\sin(t)+C$',
+        respuestaLaTeX:coefC+'\\sin(t)+C',
+        acepta:[coefC+'sin(t)+C',coefC+'sin(t)',coefC+'sinx+C',coefC+'sinx',
+                coefC+'sen(t)+C',coefC+'sen(t)',coefC+'senx+C',coefC+'senx'],
+        pista:'Recuerda que $\\dfrac{d}{dx}\\sin(x)=\\cos(x)$, por lo tanto '+
+          '$\\int\\cos(x)\\,dx=\\sin(x)+C$. La constante $'+k3+'$ se saca de la integral.',
+        explicacion:'Paso 1. Saca la constante: $'+k3+'\\int\\cos(t)\\,dt$. '+
+          'Paso 2. Aplica la regla: $\\int\\cos(t)\\,dt=\\sin(t)+C$. '+
+          'Paso 3. Multiplica: $s(t)='+coefC+'\\sin(t)+C$.'
+      };
+    }
+  }
+
+  /* V4 — Exponencial */
+  var k4=1+Math.floor(Math.random()*3);
+  var coefE=(k4===1)?'':String(k4);
+  return{
+    tipo:'simbolica',
+    problema:'Una ingeniera en innovación digital modela la tasa de crecimiento de datos en una red '+
+      'comunitaria como $f(x)='+(k4===1?'':k4)+'e^{x}$ GB por hora. '+
+      'Encuentra la primitiva general $\\displaystyle\\int '+(k4===1?'':k4)+'e^{x}\\,dx$.',
+    solucion:'$\\displaystyle\\int '+(k4===1?'':k4)+'e^{x}\\,dx='+coefE+'e^{x}+C$',
+    respuestaLaTeX:coefE+'e^{x}+C',
+    acepta:[coefE+'e^x+C',coefE+'e^x',coefE+'e^{x}+C',coefE+'e^{x}'],
+    pista:'La función $e^{x}$ es su propia derivada: $\\dfrac{d}{dx}e^{x}=e^{x}$, '+
+      'por lo tanto $\\int e^{x}\\,dx=e^{x}+C$. La constante $'+k4+'$ se saca de la integral.',
+    explicacion:'Paso 1. Saca la constante: $'+k4+'\\int e^{x}\\,dx$. '+
+      'Paso 2. Aplica la regla: $\\int e^{x}\\,dx=e^{x}+C$. '+
+      'Paso 3. Multiplica: $'+coefE+'e^{x}+C$.'
+  };
+}
+
+/* ==================== UI ==================== */
+var ejercicioActual=null,aciertos=0,intentos=0;
+var elEnunciado=document.getElementById('enunciado');
+var elRespuesta=document.getElementById('respuesta');
+var elFeedback=document.getElementById('feedback');
+var elPista=document.getElementById('pistaBox');
+var elExplicacion=document.getElementById('explicacionBox');
+
+function tiposet(nodo,intento){
+  intento=intento||0;
+  if(window.MathJax&&MathJax.typesetPromise){MathJax.typesetPromise([nodo]).catch(function(){});return;}
+  if(intento<40)setTimeout(function(){tiposet(nodo,intento+1);},200);
+}
+
+function nuevoEjercicio(){
+  ejercicioActual=genAntiderivadas();
+  elEnunciado.innerHTML=ejercicioActual.problema;
+  elRespuesta.value='';
+  elFeedback.className='feedback';elFeedback.innerHTML='';
+  elPista.className='panel pista';elPista.innerHTML='';
+  elExplicacion.className='panel explicacion';elExplicacion.innerHTML='';
+  tiposet(elEnunciado);
+  elRespuesta.focus();
+}
+
+function verificar(){
+  if(!ejercicioActual)return;
+  var entrada=elRespuesta.value;
+  if(String(entrada).trim()===''){
+    elFeedback.className='feedback err';elFeedback.innerHTML='Escribe una respuesta antes de verificar.';
+    return;
+  }
+  var correcto=coincideAntiderivada(entrada,ejercicioActual.acepta||[]);
+  intentos++;document.getElementById('mInt').textContent=intentos;
+  if(correcto){
+    aciertos++;document.getElementById('mArc').textContent=aciertos;
+    elFeedback.className='feedback ok';
+    elFeedback.innerHTML=
+      '<div style="font-size:1.05em">✓ ¡Correcto!</div>'+
+      '<div style="margin-top:8px;font-size:.92em;font-weight:500">Escribiste: <code>'+escaparHTML(String(entrada))+'</code></div>'+
+      '<div style="margin-top:6px;font-weight:500">En notación matemática: $'+ejercicioActual.respuestaLaTeX+'$</div>';
+    tiposet(elFeedback);
+    mostrarExplicacion();
+  }else{
+    elFeedback.className='feedback err';
+    elFeedback.innerHTML='✗ Todavía no. Recuerda incluir el término $+C$ y revisar el procedimiento.';
+    tiposet(elFeedback);
+  }
+}
+
+function mostrarPista(){
+  if(!ejercicioActual)return;
+  elPista.innerHTML='<h3>Pista</h3>'+ejercicioActual.pista;
+  elPista.className='panel pista visible';
+  tiposet(elPista);
+}
+function mostrarExplicacion(){
+  if(!ejercicioActual)return;
+  elExplicacion.innerHTML='<h3>Explicación paso a paso</h3>'+ejercicioActual.explicacion;
+  elExplicacion.className='panel explicacion visible';
+  tiposet(elExplicacion);
+}
+
+document.getElementById('btnNuevo').addEventListener('click',nuevoEjercicio);
+document.getElementById('btnVerificar').addEventListener('click',verificar);
+document.getElementById('btnPista').addEventListener('click',mostrarPista);
+document.getElementById('btnExplicacion').addEventListener('click',mostrarExplicacion);
+elRespuesta.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();verificar();}});
+document.addEventListener('keydown',function(e){
+  if(e.key==='n'||e.key==='N'){
+    var a=document.activeElement;
+    if(a&&a.tagName==='INPUT')return;
+    nuevoEjercicio();
+  }
+});
+
+nuevoEjercicio();
+</script>
+</body>
+</html>
