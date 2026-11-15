@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cálculo Integral · Método de sustitución</title>
+<script>
+  window.MathJax = {
+    tex: { inlineMath: [['$','$'],['\\(','\\)']], displayMath: [['$$','$$']] },
+    svg: { fontCache: 'global' },
+    options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+  };
+</script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+  :root{--bg:#f4f6fb;--card:#fff;--ink:#111827;--muted:#6b7280;--brand:#4f46e5;--brand2:#7c3aed;
+        --ok:#059669;--okbg:#ecfdf5;--err:#dc2626;--errbg:#fef2f2;--line:#e5e7eb;--warn:#b45309;--warnbg:#fffbeb}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+       background:var(--bg);color:var(--ink);line-height:1.55;min-height:100vh}
+  header{background:linear-gradient(135deg,var(--brand) 0%,var(--brand2) 100%);color:#fff;padding:26px 20px 30px}
+  .wrap{max-width:900px;margin:0 auto}
+  header h1{margin:0 0 6px;font-size:1.35rem;letter-spacing:-.01em}
+  header p{margin:0;opacity:.92;font-size:.92rem}
+  main{max-width:900px;margin:-20px auto 60px;padding:0 20px}
+  .card{background:var(--card);border-radius:16px;box-shadow:0 10px 30px rgba(17,24,39,.08);
+        padding:24px;border:1px solid var(--line)}
+  .barra{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:flex-end;margin-bottom:18px}
+  input[type="text"]{font:inherit;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;
+       background:#fff;color:var(--ink);outline:none;transition:border-color .15s,box-shadow .15s}
+  input[type="text"]:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(79,70,229,.14)}
+  #enunciado{font-size:1.03rem;background:#fafafe;border:1px solid var(--line);
+       border-left:4px solid var(--brand);border-radius:12px;padding:16px 18px;margin-bottom:18px}
+  .fila{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+  #respuesta{flex:1 1 240px;min-width:180px}
+  button{font:inherit;font-weight:650;border:none;border-radius:10px;padding:10px 16px;cursor:pointer;
+         transition:transform .06s,filter .15s,background .15s}
+  button:active{transform:translateY(1px)}
+  .btn-primary{background:var(--brand);color:#fff}
+  .btn-primary:hover{filter:brightness(1.08)}
+  .btn-ghost{background:#eef2ff;color:var(--brand)}
+  .btn-ghost:hover{background:#e0e7ff}
+  .btn-soft{background:#f3f4f6;color:#374151}
+  .btn-soft:hover{background:#e5e7eb}
+  .feedback{margin-top:16px;padding:14px 16px;border-radius:12px;font-weight:600;display:none}
+  .feedback.ok{display:block;background:var(--okbg);color:var(--ok);border:1px solid #a7f3d0}
+  .feedback.err{display:block;background:var(--errbg);color:var(--err);border:1px solid #fecaca}
+  .feedback code{background:#fff;border:1px solid #d1fae5;border-radius:4px;padding:1px 6px;font-size:.9em}
+  .panel{margin-top:14px;padding:14px 16px;border-radius:12px;font-size:.95rem;display:none}
+  .panel.pista{background:var(--warnbg);border:1px solid #fde68a;color:#7c2d12}
+  .panel.explicacion{background:#f5f3ff;border:1px solid #ddd6fe;color:#3730a3}
+  .panel.visible{display:block}
+  .panel h3{margin:0 0 6px;font-size:.82rem;text-transform:uppercase;letter-spacing:.06em;opacity:.8}
+  .marcador{display:flex;gap:18px;margin-top:20px;padding-top:16px;border-top:1px dashed var(--line);
+       font-size:.85rem;color:var(--muted);font-weight:600}
+  .marcador b{color:var(--ink)}
+  footer{max-width:900px;margin:0 auto 40px;padding:0 20px;color:var(--muted);font-size:.8rem;text-align:center}
+  .kbd{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;border:1px solid var(--line);
+       border-radius:6px;padding:1px 6px;font-size:.78rem}
+  @media(max-width:560px){.card{padding:18px}#enunciado{font-size:.98rem}}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <h1>Generador infinito de ejercicios</h1>
+    <p><b>Materia:</b> Cálculo Integral &nbsp;·&nbsp; <b>Tema:</b> Método de sustitución</p>
+  </div>
+</header>
+<main>
+  <div class="card">
+    <div class="barra"><button id="btnNuevo" class="btn-ghost">Nuevo ejercicio</button></div>
+    <div id="enunciado"></div>
+    <div class="fila">
+      <input id="respuesta" type="text" autocomplete="off" spellcheck="false"
+             placeholder="Usa ^ para potencias y / para fracciones. Incluye +C.">
+      <button id="btnVerificar" class="btn-primary">Verificar</button>
+      <button id="btnPista" class="btn-soft">Pista</button>
+      <button id="btnExplicacion" class="btn-soft">Explicación</button>
+    </div>
+    <div id="feedback" class="feedback"></div>
+    <div id="pistaBox" class="panel pista"></div>
+    <div id="explicacionBox" class="panel explicacion"></div>
+    <div class="marcador">
+      <span>Aciertos: <b id="mArc">0</b></span>
+      <span>Intentos: <b id="mInt">0</b></span>
+      <span style="margin-left:auto">Enter = verificar · <span class="kbd">N</span> = nuevo</span>
+    </div>
+  </div>
+</main>
+<footer>Generador aleatorio educativo · Cálculo Integral · Método de sustitución</footer>
+
+<script>
+function escaparHTML(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+function normalizar(valor){
+  var t=(valor===null||valor===undefined)?'':String(valor);
+  t=t.toLowerCase().trim();
+  t=t.replace(/\$/g,'');
+  t=t.replace(/\\(left|right|big|Big|bigg|Bigg)/g,'');
+  t=t.replace(/\\[,;:!]/g,'').replace(/\\(quad|qquad)/g,'');
+  t=t.replace(/\\dfrac/g,'\\frac');
+  t=t.replace(/\\(cdot|times|ast)/g,'*').replace(/\\div/g,'/');
+  t=t.replace(/\\sin/g,'sin').replace(/\\cos/g,'cos').replace(/\\tan/g,'tan');
+  t=t.replace(/\\ln/g,'ln').replace(/\\log/g,'log').replace(/\\exp/g,'exp');
+  t=t.replace(/\\pi/g,'pi');
+  t=t.replace(/²/g,'^2').replace(/³/g,'^3').replace(/⁴/g,'^4').replace(/⁵/g,'^5').replace(/⁶/g,'^6');
+  t=t.replace(/\s+/g,'').replace(/·/g,'*');
+  var previo;
+  do{previo=t;t=t.replace(/\\frac\{([^{}]*)\}\{([^{}]*)\}/g,'(($1)/($2))');}while(t!==previo);
+  t=t.replace(/[{}]/g,'').replace(/\\/g,'');
+  do{previo=t;t=t.replace(/\^\(([^()]*)\)/g,'^$1');}while(t!==previo);
+  return t.replace(/\*\*/g,'^');
+}
+function sinParentesis(s){return String(s).replace(/[()]/g,'');}
+
+function coincideAntiderivada(entrada,acepta){
+  var u=normalizar(entrada);if(!u)return false;
+  var uSinC=u.replace(/\+c$/,'').replace(/-c$/,'');
+  var uSin=sinParentesis(uSinC);
+  for(var i=0;i<acepta.length;i++){
+    var a=normalizar(acepta[i]);
+    var aSinC=a.replace(/\+c$/,'').replace(/-c$/,'');
+    if(u===a)return true;
+    if(uSinC===aSinC)return true;
+    if(uSin===sinParentesis(aSinC))return true;
+  }
+  return false;
+}
+
+/* ==================== GENERADOR: Método de sustitución ==================== */
+function genSustitucion(){
+  var t=Math.floor(Math.random()*5);
+
+  /* V0: ∫ 2x(x²+1)² dx = (x²+1)³/3 + C */
+  if(t===0){
+    return{
+      tipo:'simbolica',
+      problema:'Una integrante del colectivo Mujeres en Código necesita resolver '+
+        '$\\displaystyle\\int 2x\\left(x^{2}+1\\right)^{2}\\,dx$. '+
+        'Usa el método de sustitución y escribe la primitiva general.',
+      solucion:'$\\displaystyle\\int 2x\\left(x^{2}+1\\right)^{2}\\,dx=\\frac{\\left(x^{2}+1\\right)^{3}}{3}+C$',
+      respuestaLaTeX:'\\frac{\\left(x^{2}+1\\right)^{3}}{3}+C',
+      acepta:[
+        '(x^2+1)^3/3+C','(x^2+1)^3/3','(x^{2}+1)^{3}/3+C','(x^{2}+1)^{3}/3',
+        '\\frac{(x^2+1)^3}{3}+C','\\frac{(x^{2}+1)^{3}}{3}+C',
+        '(1/3)(x^2+1)^3+C','1/3*(x^2+1)^3+C'
+      ],
+      pista:'Observa que la derivada de $x^{2}+1$ es $2x$, que aparece como factor. '+
+        'Haz $u=x^{2}+1$, entonces $du=2x\\,dx$.',
+      explicacion:'Paso 1. Sea $u=x^{2}+1$, entonces $du=2x\\,dx$. '+
+        'Paso 2. La integral se convierte en $\\int u^{2}\\,du$. '+
+        'Paso 3. Integra: $\\frac{u^{3}}{3}+C$. '+
+        'Paso 4. Regresa a la variable original: $\\frac{\\left(x^{2}+1\\right)^{3}}{3}+C$.'
+    };
+  }
+
+  /* V1: ∫ (2x+1)⁴ dx = (2x+1)⁵/10 + C */
+  if(t===1){
+    return{
+      tipo:'simbolica',
+      problema:'Una investigadora del programa Ciencia sin Fronteras quiere resolver '+
+        '$\\displaystyle\\int \\left(2x+1\\right)^{4}\\,dx$. '+
+        'Aplica el método de sustitución y escribe la primitiva general.',
+      solucion:'$\\displaystyle\\int \\left(2x+1\\right)^{4}\\,dx=\\frac{\\left(2x+1\\right)^{5}}{10}+C$',
+      respuestaLaTeX:'\\frac{\\left(2x+1\\right)^{5}}{10}+C',
+      acepta:[
+        '(2x+1)^5/10+C','(2x+1)^5/10','(2x+1)^{5}/10+C','(2x+1)^{5}/10',
+        '\\frac{(2x+1)^5}{10}+C','\\frac{(2x+1)^{5}}{10}+C',
+        '(1/10)(2x+1)^5+C','1/10*(2x+1)^5+C'
+      ],
+      pista:'Haz $u=2x+1$, entonces $du=2\\,dx$ y $dx=du/2$. '+
+        'Sustituye en la integral y aplica la regla de la potencia.',
+      explicacion:'Paso 1. Sea $u=2x+1$, entonces $du=2\\,dx$, es decir, $dx=\\frac{du}{2}$. '+
+        'Paso 2. La integral se vuelve $\\frac{1}{2}\\int u^{4}\\,du$. '+
+        'Paso 3. Integra: $\\frac{1}{2}\\cdot\\frac{u^{5}}{5}+C=\\frac{u^{5}}{10}+C$. '+
+        'Paso 4. Regresa: $\\frac{\\left(2x+1\\right)^{5}}{10}+C$.'
+    };
+  }
+
+  /* V2: ∫ 3x²(x³+2)² dx = (x³+2)³/3 + C */
+  if(t===2){
+    return{
+      tipo:'simbolica',
+      problema:'En una comunidad textil de Chiapas, una artesana modela la producción con la integral '+
+        '$\\displaystyle\\int 3x^{2}\\left(x^{3}+2\\right)^{2}\\,dx$. '+
+        'Resuélvela usando sustitución y escribe la familia de primitivas.',
+      solucion:'$\\displaystyle\\int 3x^{2}\\left(x^{3}+2\\right)^{2}\\,dx=\\frac{\\left(x^{3}+2\\right)^{3}}{3}+C$',
+      respuestaLaTeX:'\\frac{\\left(x^{3}+2\\right)^{3}}{3}+C',
+      acepta:[
+        '(x^3+2)^3/3+C','(x^3+2)^3/3','(x^{3}+2)^{3}/3+C','(x^{3}+2)^{3}/3',
+        '\\frac{(x^3+2)^3}{3}+C','\\frac{(x^{3}+2)^{3}}{3}+C',
+        '(1/3)(x^3+2)^3+C','1/3*(x^3+2)^3+C'
+      ],
+      pista:'La derivada de $x^{3}+2$ es $3x^{2}$, que aparece multiplicando. '+
+        'Haz $u=x^{3}+2$, $du=3x^{2}\\,dx$.',
+      explicacion:'Paso 1. Sea $u=x^{3}+2$, entonces $du=3x^{2}\\,dx$. '+
+        'Paso 2. La integral se convierte en $\\int u^{2}\\,du$. '+
+        'Paso 3. Integra: $\\frac{u^{3}}{3}+C$. '+
+        'Paso 4. Regresa: $\\frac{\\left(x^{3}+2\\right)^{3}}{3}+C$.'
+    };
+  }
+
+  /* V3: ∫ x·e^(x²) dx = e^(x²)/2 + C */
+  if(t===3){
+    return{
+      tipo:'simbolica',
+      problema:'Una ingeniera en innovación digital analiza la tasa de transferencia de datos con la integral '+
+        '$\\displaystyle\\int x\\,e^{x^{2}}\\,dx$. '+
+        'Aplica el método de sustitución y escribe el resultado.',
+      solucion:'$\\displaystyle\\int x\\,e^{x^{2}}\\,dx=\\frac{e^{x^{2}}}{2}+C$',
+      respuestaLaTeX:'\\frac{e^{x^{2}}}{2}+C',
+      acepta:[
+        'e^(x^2)/2+C','e^(x^2)/2','e^{x^2}/2+C','e^{x^2}/2',
+        'e^x^2/2+C','e^x^2/2',
+        '(1/2)e^(x^2)+C','(1/2)e^{x^2}+C','1/2*e^(x^2)+C',
+        '\\frac{e^{x^2}}{2}+C','\\frac{e^{x^{2}}}{2}+C'
+      ],
+      pista:'La derivada de $x^{2}$ es $2x$, y en la integral aparece $x$. '+
+        'Haz $u=x^{2}$, entonces $du=2x\\,dx$, es decir, $x\\,dx=\\frac{du}{2}$.',
+      explicacion:'Paso 1. Sea $u=x^{2}$, entonces $du=2x\\,dx$, es decir, $x\\,dx=\\frac{du}{2}$. '+
+        'Paso 2. La integral se vuelve $\\frac{1}{2}\\int e^{u}\\,du$. '+
+        'Paso 3. Integra: $\\frac{1}{2}e^{u}+C$. '+
+        'Paso 4. Regresa: $\\frac{e^{x^{2}}}{2}+C$.'
+    };
+  }
+
+  /* V4: ∫ (2x+1)(x²+x+1)² dx = (x²+x+1)³/3 + C */
+  return{
+    tipo:'simbolica',
+    problema:'Una bióloga del programa Ciencia sin Fronteras modela el crecimiento de una colonia con la integral '+
+      '$\\displaystyle\\int \\left(2x+1\\right)\\left(x^{2}+x+1\\right)^{2}\\,dx$. '+
+      'Resuélvela usando sustitución y escribe la primitiva general.',
+    solucion:'$\\displaystyle\\int \\left(2x+1\\right)\\left(x^{2}+x+1\\right)^{2}\\,dx=\\frac{\\left(x^{2}+x+1\\right)^{3}}{3}+C$',
+    respuestaLaTeX:'\\frac{\\left(x^{2}+x+1\\right)^{3}}{3}+C',
+    acepta:[
+      '(x^2+x+1)^3/3+C','(x^2+x+1)^3/3',
+      '(x^{2}+x+1)^{3}/3+C','(x^{2}+x+1)^{3}/3',
+      '\\frac{(x^2+x+1)^3}{3}+C','\\frac{(x^{2}+x+1)^{3}}{3}+C',
+      '(1/3)(x^2+x+1)^3+C','1/3*(x^2+x+1)^3+C'
+    ],
+    pista:'Observa que la derivada de $x^{2}+x+1$ es exactamente $2x+1$, que aparece como factor. '+
+      'Haz $u=x^{2}+x+1$, $du=(2x+1)\\,dx$.',
+    explicacion:'Paso 1. Sea $u=x^{2}+x+1$, entonces $du=(2x+1)\\,dx$. '+
+      'Paso 2. La integral se convierte en $\\int u^{2}\\,du$. '+
+      'Paso 3. Integra: $\\frac{u^{3}}{3}+C$. '+
+      'Paso 4. Regresa: $\\frac{\\left(x^{2}+x+1\\right)^{3}}{3}+C$.'
+  };
+}
+
+/* ==================== UI ==================== */
+var ejercicioActual=null,aciertos=0,intentos=0;
+var elEnunciado=document.getElementById('enunciado');
+var elRespuesta=document.getElementById('respuesta');
+var elFeedback=document.getElementById('feedback');
+var elPista=document.getElementById('pistaBox');
+var elExplicacion=document.getElementById('explicacionBox');
+
+function tiposet(nodo,intento){
+  intento=intento||0;
+  if(window.MathJax&&MathJax.typesetPromise){MathJax.typesetPromise([nodo]).catch(function(){});return;}
+  if(intento<40)setTimeout(function(){tiposet(nodo,intento+1);},200);
+}
+
+function nuevoEjercicio(){
+  ejercicioActual=genSustitucion();
+  elEnunciado.innerHTML=ejercicioActual.problema;
+  elRespuesta.value='';
+  elFeedback.className='feedback';elFeedback.innerHTML='';
+  elPista.className='panel pista';elPista.innerHTML='';
+  elExplicacion.className='panel explicacion';elExplicacion.innerHTML='';
+  tiposet(elEnunciado);
+  elRespuesta.focus();
+}
+
+function verificar(){
+  if(!ejercicioActual)return;
+  var entrada=elRespuesta.value;
+  if(String(entrada).trim()===''){
+    elFeedback.className='feedback err';elFeedback.innerHTML='Escribe una respuesta antes de verificar.';
+    return;
+  }
+  var correcto=coincideAntiderivada(entrada,ejercicioActual.acepta||[]);
+  intentos++;document.getElementById('mInt').textContent=intentos;
+  if(correcto){
+    aciertos++;document.getElementById('mArc').textContent=aciertos;
+    elFeedback.className='feedback ok';
+    elFeedback.innerHTML=
+      '<div style="font-size:1.05em">✓ ¡Correcto!</div>'+
+      '<div style="margin-top:8px;font-size:.92em;font-weight:500">Escribiste: <code>'+escaparHTML(String(entrada))+'</code></div>'+
+      '<div style="margin-top:6px;font-weight:500">En notación matemática: $'+ejercicioActual.respuestaLaTeX+'$</div>';
+    tiposet(elFeedback);
+    mostrarExplicacion();
+  }else{
+    elFeedback.className='feedback err';
+    elFeedback.innerHTML='✗ Todavía no. Recuerda identificar $u$ y $du$, y no olvides el término $+C$.';
+    tiposet(elFeedback);
+  }
+}
+
+function mostrarPista(){
+  if(!ejercicioActual)return;
+  elPista.innerHTML='<h3>Pista</h3>'+ejercicioActual.pista;
+  elPista.className='panel pista visible';
+  tiposet(elPista);
+}
+function mostrarExplicacion(){
+  if(!ejercicioActual)return;
+  elExplicacion.innerHTML='<h3>Explicación paso a paso</h3>'+ejercicioActual.explicacion;
+  elExplicacion.className='panel explicacion visible';
+  tiposet(elExplicacion);
+}
+
+document.getElementById('btnNuevo').addEventListener('click',nuevoEjercicio);
+document.getElementById('btnVerificar').addEventListener('click',verificar);
+document.getElementById('btnPista').addEventListener('click',mostrarPista);
+document.getElementById('btnExplicacion').addEventListener('click',mostrarExplicacion);
+elRespuesta.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();verificar();}});
+document.addEventListener('keydown',function(e){
+  if(e.key==='n'||e.key==='N'){
+    var a=document.activeElement;
+    if(a&&a.tagName==='INPUT')return;
+    nuevoEjercicio();
+  }
+});
+
+nuevoEjercicio();
+</script>
+</body>
+</html>
